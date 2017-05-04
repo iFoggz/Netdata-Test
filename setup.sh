@@ -63,7 +63,7 @@ function ei {
 	# Ask questions easier. Reply in substituted value?
 	# $1 is type
 	# $2 output string. ex value will become $value.
-	# $3 and on is question
+	# $3 is the question
 	if [[ "$1" == "1" ]]
 	then
 		read -p "$(echo -e ${TQ}" ${3} ")" -n 1 "${2}"
@@ -87,7 +87,7 @@ function check_root {
 	checkroot=$(id | cut -d "=" -f2- | rev | cut -d "(" -f4-)
 	if [[ "$checkroot" == "0" ]]
 	then
-		eo I "DETECTED: UID=0"
+		eo I "DETECTED: UID=0 (root)"
 		eo Y "Do we have root privilege?"
 		return 1
 	else
@@ -105,7 +105,7 @@ function check_root {
 
 function check_release {
 
-	eo D "Checking release information.."
+	eo D "Checking release information."
 	if [[ -s /usr/bin/lsb_release ]]
 	then
 		eo Y "Was lsb_release found?"
@@ -113,13 +113,13 @@ function check_release {
 		if [[ "$osrelease" == "Ubuntu" || "$osrelease" == "Debian" ]]
 		then
 			eo I "Release is $osrelease"
-			eo I "Installing for Ubuntu/Debian.."
+			eo I "Installing for Ubuntu/Debian."
 			os="1"
 			return 1
 		else
 			eo I "Release is $osrelease"
-			eo E "$osrelease is currently not supported.."
-			eo E "Exiting.."
+			eo E "$osrelease is currently not supported."
+			eo E "Exiting."
 			exit 1
 		fi
 	else
@@ -131,17 +131,47 @@ function check_release {
 	ei 1 os_release "Please select your distribution:"
 	if [[ "$os_release" == "1" ]]
 	then
-		eo D "Installing for Ubuntu/Debian.."
+		eo I "Installing for Ubuntu/Debian."
 		os="1"
 		return 1
 	else
-		eo E "Bad input.."
-		eo E "Exiting.."
+		eo E "Bad input."
+		eo E "Exiting."
 		exit 1
 	fi
 	exit 1
 
 }
+
+# To default of not to default that is the real question.
+
+function gather_info {
+
+	eo D "Gathering information about your setup."
+	eo D
+	ei 1 default "Would you like to use the default setup?"
+	case "$default" in
+		Y|y ) defaultcase="Y";;
+		N|n ) defaultcase="N";;
+	esac
+	if [[ "$defaultcase" == "Y" ]]
+	then
+		eo I "User opted for default config."
+		conf_commit
+		return 1
+	elif [[ "$defaultcase" == "N" ]]
+	then
+		eo I "User opted for custom config."
+		conf_gather
+		return 1
+	else
+		echo E "Invalid selection, starting over."
+		gather_info
+		return 1
+	fi
+}
+
+
 # Start here
 
 echo
@@ -150,9 +180,11 @@ eo D "Welcome to GRC-Netdata installation."
 eo D
 eo I "STDERR information is stored in setup.err"
 eo D
-eo D "Running preinstall checks.."
+eo D "Running preinstall checks."
+eo D
 
 # Preinstall checks.
 
 check_root
 check_release
+gather_info
