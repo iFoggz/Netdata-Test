@@ -167,6 +167,7 @@ function gather_info {
 		then
 			return 1
 		else
+			conf_reset
 			conf_commit
 			return 1
 		fi
@@ -188,12 +189,44 @@ function gather_info {
 	fi
 }
 
+# conf_reset sets dafaults
+
+function conf_reset {
+
+echo 
+
+}
+
 # Check for dependencies for install and GRC-Netdata
 
 function check_dep {
 
-	# Dep check for jq, bc, netdata, curl, wget, tar, getent systemd. crontab. pgrep
-
+	eo D "Checking for dependencies.."
+	if [[ -a /usr/bin/jq ]]
+	then
+		eo Y "Is 'jq' installed?"
+	else
+		eo N "Is 'jq' installed?"
+		dep_jq
+	fi
+	if [[ -a /usr/bin/bc ]]
+	then
+		eo Y "Is 'bc' installed?"
+	else
+		eo N "Is 'bc' installed?"
+		dep_bc
+	fi
+	if [[ -a $GRCAPP ]]
+	then
+		eo Y "Is gridcoin daemon found?"
+	else
+		eo N "Is gridcoin daemon found?"
+		exit 1
+	fi
+	if [[ -a /usr/sbin/netdata ]]
+	then
+		eo Y "Is netdata installed?"
+	fi
 }
 
 # Does config file exist? If so what shall you do!
@@ -231,18 +264,19 @@ function conf_exists {
 # Gather config
 
 function conf_gather {
-        
+
 	eo D
         eo D "Lets gather information about your custom setup."
         eo I "If you leave the value empty the default option will be selected."
         eo W "Not all values are verified at this time so carefully enter the correct values."
-
+	eo D
+	ei conf
 }
 
 function conf_commit {
 
 	echo
-	
+
 }
 
 # Start here
