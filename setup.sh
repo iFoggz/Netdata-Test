@@ -20,10 +20,12 @@ TW="\033[1;33m[W]\033[m"
 TI="\033[1;34m[I]\033[m"
 TQ="\033[1;36m[?]\033[m"
 TE="\033[1;31m[E]\033[m ERROR: "
+TO="\033[1;m[>]\033[m"
 #
 # Hardcoded Values
 GRCCONF='/usr/local/bin/grc-netdata.conf'
 BINFOLDER='/usr/local/bin'
+STD='1> /dev/null 2> setup.err'
 #
 # Functions here
 
@@ -51,6 +53,8 @@ function eo {
 	elif [[ "$1" == "E" ]]
 	then
 		echo -e ${TE} ${2}
+	elif [[ "$1" == "O" ]]
+		echo -e ${TO} ${2}
 	else
 		echo BAD SYNTAX ON EOUT
 		exit 1
@@ -106,7 +110,7 @@ function check_root {
 function check_release {
 
 	eo D "Checking release information."
-	if [[ -s /usr/bin/lsb_release ]]
+	if [[ -a /usr/bin/lsb_release ]]
 	then
 		eo Y "Was lsb_release found?"
 		osrelease=$(lsb_release -i | cut -d ":" -f2- | tr -d "\t")
@@ -126,8 +130,8 @@ function check_release {
 		eo N "Was lsb_release found?"
 	fi
 	eo D "List of supported releases:"
-	eo I "1) Ubuntu/Debian"
-	eo I "2) Not yet implemented"
+	eo O "1) Ubuntu/Debian"
+	eo O "2) Not yet implemented"
 	ei 1 os_release "Please select your distribution:"
 	if [[ "$os_release" == "1" ]]
 	then
@@ -157,13 +161,25 @@ function gather_info {
 	if [[ "$defaultcase" == "Y" ]]
 	then
 		eo I "User opted for default config."
-		conf_commit
-		return 1
+		conf_exists
+		if [[ "$keepconfigcase" == "Y" ]]
+		then
+			return 1
+		else
+			conf_commit
+			return 1
+		fi
 	elif [[ "$defaultcase" == "N" ]]
 	then
 		eo I "User opted for custom config."
-		conf_gather
-		return 1
+		conf_exists
+		if [[ "$keepconfigcase" == "Y" ]]
+		then
+			return 1
+		else
+			conf_gather
+			return 1
+		fi
 	else
 		echo E "Invalid selection, starting over."
 		gather_info
@@ -171,6 +187,47 @@ function gather_info {
 	fi
 }
 
+# Does config file exist? If so what shall you do!
+
+function conf_exists {
+	eo D "Checking for existing config."
+	if [[ -a $GRCCONF ]]
+	then
+		eo Y "Does $GRCCONF already exist?"
+		ei 1 keepconfig "Would you like to keep your existing config?"
+		case "$keepconfig" in
+			Y|y ) keepconfigcase="Y";;
+			N|n ) keepconfigcase="N";;
+		esac
+		if [[ "$keepconfigcase" == "Y" ]]
+		then
+			eo I "Keeping config as requested. Resuming install."
+			return 1
+		elif [[ "$keepconfigcase" == "N" ]]
+		then
+			eo I "Removing previous config as requested."
+			rm -f $GRCCONF "$STD"
+			return 1
+		else
+			eo E "Bad input. Try again."
+			conf_exists
+			return 1
+		fi
+	else
+		eo N "Does $GRCONF already exist?"
+		return 1
+	fi
+}
+
+# Gather config
+
+function conf_gather {
+
+}
+
+function conf_commit {
+
+}
 
 # Start here
 
