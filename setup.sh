@@ -54,6 +54,7 @@ function eo {
 	then
 		echo -e ${TE} ${2}
 	elif [[ "$1" == "O" ]]
+	then
 		echo -e ${TO} ${2}
 	else
 		echo BAD SYNTAX ON EOUT
@@ -153,7 +154,7 @@ function gather_info {
 
 	eo D "Gathering information about your setup."
 	eo D
-	ei 1 default "Would you like to use the default setup?"
+	ei 1 default "Would you like to use the default setup? (Y/N):"
 	case "$default" in
 		Y|y ) defaultcase="Y";;
 		N|n ) defaultcase="N";;
@@ -187,6 +188,14 @@ function gather_info {
 	fi
 }
 
+# Check for dependencies for install and GRC-Netdata
+
+function check_dep {
+
+	# Dep check for jq, bc, netdata, curl, wget, tar, getent systemd. crontab. pgrep
+
+}
+
 # Does config file exist? If so what shall you do!
 
 function conf_exists {
@@ -194,7 +203,7 @@ function conf_exists {
 	if [[ -a $GRCCONF ]]
 	then
 		eo Y "Does $GRCCONF already exist?"
-		ei 1 keepconfig "Would you like to keep your existing config?"
+		ei 1 keepconfig "Would you like to keep your existing config? (Y/N):"
 		case "$keepconfig" in
 			Y|y ) keepconfigcase="Y";;
 			N|n ) keepconfigcase="N";;
@@ -206,7 +215,7 @@ function conf_exists {
 		elif [[ "$keepconfigcase" == "N" ]]
 		then
 			eo I "Removing previous config as requested."
-			rm -f $GRCCONF "$STD"
+			rm -f "GRCCONF" "$STD"
 			return 1
 		else
 			eo E "Bad input. Try again."
@@ -222,11 +231,18 @@ function conf_exists {
 # Gather config
 
 function conf_gather {
+        
+	eo D
+        eo D "Lets gather information about your custom setup."
+        eo I "If you leave the value empty the default option will be selected."
+        eo W "Not all values are verified at this time so carefully enter the correct values."
 
 }
 
 function conf_commit {
 
+	echo
+	
 }
 
 # Start here
@@ -244,4 +260,5 @@ eo D
 
 check_root
 check_release
+check_dep
 gather_info
