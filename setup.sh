@@ -21,12 +21,11 @@ TI="\033[1;34m[I]\033[m"
 TQ="\033[1;36m[?]\033[m"
 TE="\033[1;31m[E]\033[m ERROR: "
 TO="\033[1;m[>]\033[m"
-DELIM=";"
 #
 # Hardcoded Values
-GRCCONF='/usr/local/bin/grc-netdata.conf'
-BINFOLDER='/usr/local/bin'
-STD=' 1> /dev/null 2> setup.err'
+GRCCONF="/usr/local/bin/grc-netdata.conf"
+BINFOLDER="/usr/local/bin"
+STD=" 1> /dev/null 2> setup.err"
 #
 # Functions here
 
@@ -95,7 +94,6 @@ function check_root {
 	then
 		eo I "DETECTED: UID=0 (root)"
 		eo Y "Do we have root privilege?"
-		return 1
 	else
 		eo I "DETECTED: UID=$checkroot"
 		eo N "Do we have root privilege?"
@@ -145,7 +143,6 @@ function check_release {
 		eo E "Exiting."
 		exit 1
 	fi
-	exit 1
 
 }
 
@@ -195,17 +192,17 @@ function gather_info {
 
 function conf_reset {
 
-	GRCUSER='gridcoin'
-	GRCPATH='home/gridcoin/.Gridcoinresearch'
-	GRCAPP='/usr/bin/gridcoinresearchd'
-	FREEGEOIPPORT='5000'
-	GETINFOTIMER='5s'
-	GETINFODELAY='7min'
-	GETGEOTIMER='15s'
-	GETGEODELAY='7min'
-	GETMARKETTIMER='15s'
-	GETMARKETDELAY='7mins'
-
+	GRCUSER="gridcoin"
+	GRCPATH="home/gridcoin/.Gridcoinresearch"
+	GRCAPP="/usr/bin/gridcoinresearchd"
+	FREEGEOIPPORT="5000"
+	GETINFOTIMER="5s"
+	GETINFODELAY="7min"
+	GETGEOTIMER="15s"
+	GETGEODELAY="7min"
+	GETMARKETTIMER="15s"
+	GETMARKETDELAY="7mins"
+	return 1
 }
 
 # Check for dependencies for install and GRC-Netdata
@@ -272,43 +269,320 @@ function conf_exists {
 	fi
 }
 
+# conf_set_useraccount seperated these so user wouldn't have to re go through config.
+# Not most ideal but better then messing up one of last values and having to start over.
+# Yea I could make a routine help people make bash look more like assembly?? But no room for a troll ;)
+
+function conf_set_grcuser {
+
+	GRCUSER="gridcoin"
+	confgrcuser="0"
+        ei 2 confanswer "What account is running the gridcoin client? (Default = gridcoin):"
+        if [[ "$confanswer" == "" ]]
+        then
+                GRCUSER="gridcoin"
+        else
+                GRCUSER="$confanswer"
+        fi
+        eo I "Using account $GRCUSER."
+        while read -r passwdline; do
+                passwdlineparse="${passwdline%%:*}"
+                if [[ "$passwdlineparse" == "$GRCUSER" ]]
+                then
+                        confgrcuser="1"
+                        break
+                fi
+        done < /etc/passwd
+        if [[ "$confgrcuser" == "0" ]]
+        then
+                eo N "Does account $GRCUSER exist?"
+                eo E "No account $GRCUSER found. Let's start again."
+                conf_set_grcuser
+                return 1
+        elif [[ "$confgrcuser" == "1" ]]
+        then
+                eo Y "Does account $GRCUSER exist?"
+        else
+                eo E "Unexpected error. Lets try again."
+                conf_set_grcuser
+                return 1
+        fi
+
+}
+
+# conf_set_grcpath
+
+function conf_set_grcpath {
+
+        ei 2 confanswer "What is the path of the gridcoin data directory? (Default = /home/$GRCUSER/.GridcoinResearch) :"
+        if [[ "$confanswer" == "" ]]
+        then
+                GRCPATH="/home/$GRCUSER/.GridcoinResearch"
+                eo I "Using default of /home/$GRCUSER/.GridcoinResearch"
+        else
+                GRCPATH="$confanswer"
+        fi
+	eo I "Checking path $GRCPATH."
+        if [[ -d $GRCPATH ]]
+        then
+                eo Y "Does $GRCPATH exist?"
+		return 1
+        else
+                eo N "Does $GRCPATH exist?"
+                eo E "$GRCPATH not found. Lets try again."
+		conf_set_grcpath
+		return 1
+	fi
+
+}
+
+# conf_set_grcapp
+
+function conf_set_grcapp {
+
+        ei 2 confanswer "What is the location of gridcoinresearchd? (Default = /usr/bin/gridcoinresearchd) :"
+        if [[ "$confanswer" == "" ]]
+        then
+                GRCAPP="/usr/bin/gridcoinresearchd"
+                eo I "Using default of /usr/bin/gridcoinresearchd"
+        else
+                GRCAPP="$confanswer"
+        fi
+        eo I "Checking for $GRCAPP."
+        if [[ -a $GRCAPP ]]
+        then
+                eo Y "Does $GRCAPP exist?"
+                return 1
+        else
+                eo N "Does $GRCAPP exist?"
+                eo E "$GRCAPP not found. Lets try again."
+                conf_set_grcapp
+                return 1
+        fi
+
+}
+
+# conf_set_freegeoipport
+
+function conf_set_freegeoipport {
+
+	eo W "Port needs to be set inbetween port 1025 and 65534. Port 1024 and less is reserved for root."
+        ei 2 confanswer "What port on local loopback would you like to use with freegeoip API? (Default = 5000) :"
+        if [[ "$confanswer" == "" ]]
+        then
+                FREEGEOIPPORT="5000"
+                eo I "Using default of port 5000."
+        else
+                FREEGEOIPPORT="$confanswer"
+        fi
+        eo I "Checking port value $FREEGEOIPPORT."
+	if [[ "$FREEGEOIPPORT" =~ ^[0-9]+$ ]]
+	then
+	        if [[ $FREEGEOIPPORT -ge 1025 && $FREEGEOIPPORT -le 65534 ]]
+	        then
+	                eo Y "Is $FREEGEOIPPORT valid?"
+			FREEGEOIPPORT="$FREEGEOIPPORT"
+	                return 1
+	        else
+	                eo N "Is port $FREEGEOIPPORT valid?"
+	                eo E "$FREEGEOIPPORT is not in valid range of 1025-65534. Lets try again."
+	                conf_set_freegeoipport
+	                return 1
+		fi
+	else
+		eo E "$FREEGEOIPPORT is not a valid numeric value. Lets try again"
+		conf_set_freegeoipport
+		return 1
+        fi
+
+}
+
+# conf_set_getinfotimer
+
+function conf_set_getinfotimer {
+
+	ei 2 confanswer "How often should the base gridcoin chart gather updates (Default = 5s):"
+	if [[ "$confanswer" == "" ]]
+	then
+		GETINFOTIMER="5s"
+		eo I "Using default of 5s."
+	else
+		GETINFOTIMER="$confanswer"
+	fi
+	eo I "Checking is $GETINFOTIMER is valid entry."
+	if [[ ${GETINFOTIMER%%s} =~ ^[0-9]+$ && "$GETINFOTIMER" == *s ]]
+	then
+		eo Y "$GETINFOTIMER is a valid entry."
+		return 1
+	else
+		eo N "$GETINFOTIMER is a valid entry."
+		eo E "Bad input! Lets try again"
+		conf_set_getinfotimer
+		return 1
+	fi
+
+}
+
+# conf_set_getinfodelay
+
+function conf_set_getinfodelay {
+
+        ei 2 confanswer "How long of a delay after netdata starts should gridcoin chart gathering begin (Default = 7min):"
+        if [[ "$confanswer" == "" ]]
+        then
+                GETINFODELAY="7min"
+                eo I "Using default of 7min."
+        else
+                GETINFODELAY="$confanswer"
+        fi
+        eo I "Checking is $GETINFODELAY is valid entry."
+        if [[ ${GETINFODELAY%%min} =~ ^[0-9]+$ && "$GETINFODELAY" == *min ]]
+        then
+                eo Y "$GETINFODELAY is a valid entry."
+		return 1
+        else
+                eo N "$GETINFODELAY is not a valid entry."
+		eo E "Bad input! Lets try again."
+                conf_set_getinfodelay
+                return 1
+        fi
+
+}
+
+# conf_set_getgeotimer
+
+function conf_set_getgeotimer {
+
+        ei 2 confanswer "How often should geography of peers gather updates (Default = 15s):"
+        if [[ "$confanswer" == "" ]]
+        then
+                GETGEOTIMER="15s"
+                eo I "Using default of 15s."
+        else
+                GETGEOTIMER="$confanswer"
+        fi
+        eo I "Checking is $GETGEOTIMER is valid entry."
+        if [[ ${GETGEOTIMER%%s} =~ ^[0-9]+$ && "$GETGEOTIMER" == *s ]]
+        then
+                eo Y "$GETGEOTIMER is a valid entry."
+                return 1
+        else
+                eo N "$GETGEOTIMER is a valid entry."
+                eo E "Bad input! Lets try again"
+                conf_set_getgeotimer
+                return 1
+        fi
+
+}
+
+# conf_set_getgeodelay
+
+function conf_set_getgeodelay {
+
+        ei 2 confanswer "How long of a delay after netdata starts should geography of peers begin updates (Default = 7min):"
+        if [[ "$confanswer" == "" ]]
+        then
+                GETGEODELAY="7min"
+                eo I "Using default of 7min."
+        else
+                GETGEODELAY="$confanswer"
+        fi
+        eo I "Checking is $GETGEODELAY is valid entry."
+        if [[ ${GETGEODELAY%%min} =~ ^[0-9]+$ && "$GETGEODELAY" == *min ]]
+        then
+                eo Y "$GETGEODELAY is a valid entry."
+                return 1
+        else
+                eo N "$GETGEODELAY is not a valid entry."
+                eo E "Bad input! Lets try again."
+                conf_set_getgeodelay
+                return 1
+        fi
+
+}
+
+# conf_set_getmarkettimer
+
+function conf_set_getmarkettimer {
+
+        ei 2 confanswer "How often should market chart gather updates (Default = 15s):"
+        if [[ "$confanswer" == "" ]]
+        then
+                GETMARKETTIMER="15s"
+                eo I "Using default of 15s."
+        else
+                GETMARKETTIMER="$confanswer"
+        fi
+        eo I "Checking is $GETMARKETTIMER is valid entry."
+        if [[ ${GETMARKETTIMER%%s} =~ ^[0-9]+$ && "$GETMARKETTIMER" == *s ]]
+        then
+                eo Y "$GETMARKETTIMER is a valid entry."
+                return 1
+        else
+                eo N "$GETMARKETTIMER is a valid entry."
+                eo E "Bad input! Lets try again"
+                conf_set_getmarkettimer
+                return 1
+        fi
+
+}
+
+# conf_set_getmarketdelay
+
+function conf_set_getmarketdelay {
+
+        ei 2 confanswer "How long of a delay after netdata starts should market chart begin updates (Default = 7min):"
+        if [[ "$confanswer" == "" ]]
+        then
+                GETMARKETDELAY="7min"
+                eo I "Using default of 7min."
+        else
+                GETMARKETDELAY="$confanswer"
+        fi
+        eo I "Checking is $GETMARKETDELAY is valid entry."
+        if [[ ${GETMARKETDELAY%%min} =~ ^[0-9]+$ && "$GETMARKETDELAY" == *min ]]
+        then
+                eo Y "$GETMARKETDELAY is a valid entry."
+                return 1
+        else
+                eo N "$GETMARKETDELAY is not a valid entry."
+                eo E "Bad input! Lets try again."
+                conf_set_getmarketdelay
+                return 1
+        fi
+
+}
+
 # Gather config
 
 function conf_gather {
 
+	conf_reset
 	eo D
         eo D "Lets gather information about your custom setup."
-        eo I "If you leave the value empty the default option will be selected."
-        eo W "Not all values are verified at this time so carefully enter the correct values."
+	eo I "If you leave the value empty the default option will be selected."
 	eo D
-	ei 2 confanswer "What account is running the gridcoin client? (Default = 'gridcoin'):"
-	if [[ "$confanswer" == "" ]]
-	then
-		eo I "Using default of 'gridcoin'."
-		eo D "Verifying user exists."
-		confuseraccount="0"
-		while read -r passwdline; do
-			passwdlineparse="${passwdline%%:*}"
-			if [[ "$passwdlineparse" == "gridcoin" ]]
-			then
-				eo I "gridcoin account found."
-				confuseraccount="1"
-				break
-			fi
-		done < /etc/passwd
-		if [[ "$confuseraccount" == "0" ]]
-		then
-			eo E "No account gridcoin found."
-			eo E "Exiting."
-			exit 1
-		fi
-		exit 1
-	fi
+#	conf_set_grcuser
+#	conf_set_grcpath
+#	conf_set_grcapp
+#	conf_set_freegeoipport
+	eo D "Lets set systemd timer/dealys"
+        eo W "Service timers must be set as #s. Example 5s"
+	eo W "Service delays must be set as #min. Example 7min"
+	eo W "This install only supports seconds and minutes as it is pointless to be higher then that."
+	eo W "Delays are default 7min to allow time for gridcoin daemon to fully start as it takes time."
+#	conf_set_getinfotimer
+#	conf_set_getinfodelay
+	conf_set_getgeotimer
+	conf_set_getgeodelay
+	conf_set_getmarkettimer
+	conf_set_getmarketdelay
+#	conf_commit
 }
 
 function conf_commit {
 
-	echo
+	eo D "Writing config. Config file is location is /usr/local/bin/grc-netdata.conf"
 
 }
 
