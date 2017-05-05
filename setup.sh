@@ -21,11 +21,12 @@ TI="\033[1;34m[I]\033[m"
 TQ="\033[1;36m[?]\033[m"
 TE="\033[1;31m[E]\033[m ERROR: "
 TO="\033[1;m[>]\033[m"
+DELIM=";"
 #
 # Hardcoded Values
 GRCCONF='/usr/local/bin/grc-netdata.conf'
 BINFOLDER='/usr/local/bin'
-STD='1> /dev/null 2> setup.err'
+STD=' 1> /dev/null 2> setup.err'
 #
 # Functions here
 
@@ -89,7 +90,7 @@ function ei {
 function check_root {
 
 	eo D "Checking UID.."
-	checkroot=$(id | cut -d "=" -f2- | rev | cut -d "(" -f4-)
+	checkroot=$(id -u)
 	if [[ "$checkroot" == "0" ]]
 	then
 		eo I "DETECTED: UID=0 (root)"
@@ -187,13 +188,23 @@ function gather_info {
 		gather_info
 		return 1
 	fi
+
 }
 
 # conf_reset sets dafaults
 
 function conf_reset {
 
-echo 
+	GRCUSER='gridcoin'
+	GRCPATH='home/gridcoin/.Gridcoinresearch'
+	GRCAPP='/usr/bin/gridcoinresearchd'
+	FREEGEOIPPORT='5000'
+	GETINFOTIMER='5s'
+	GETINFODELAY='7min'
+	GETGEOTIMER='15s'
+	GETGEODELAY='7min'
+	GETMARKETTIMER='15s'
+	GETMARKETDELAY='7mins'
 
 }
 
@@ -248,7 +259,7 @@ function conf_exists {
 		elif [[ "$keepconfigcase" == "N" ]]
 		then
 			eo I "Removing previous config as requested."
-			rm -f "GRCCONF" "$STD"
+			rm -f "$GRCCONF" "$STD"
 			return 1
 		else
 			eo E "Bad input. Try again."
@@ -256,7 +267,7 @@ function conf_exists {
 			return 1
 		fi
 	else
-		eo N "Does $GRCONF already exist?"
+		eo N "Does $GRCCONF already exist?"
 		return 1
 	fi
 }
@@ -270,7 +281,29 @@ function conf_gather {
         eo I "If you leave the value empty the default option will be selected."
         eo W "Not all values are verified at this time so carefully enter the correct values."
 	eo D
-	ei conf
+	ei 2 confanswer "What account is running the gridcoin client? (Default = 'gridcoin'):"
+	if [[ "$confanswer" == "" ]]
+	then
+		eo I "Using default of 'gridcoin'."
+		eo D "Verifying user exists."
+		confuseraccount="0"
+		while read -r passwdline; do
+			passwdlineparse="${passwdline%%:*}"
+			if [[ "$passwdlineparse" == "gridcoin" ]]
+			then
+				eo I "gridcoin account found."
+				confuseraccount="1"
+				break
+			fi
+		done < /etc/passwd
+		if [[ "$confuseraccount" == "0" ]]
+		then
+			eo E "No account gridcoin found."
+			eo E "Exiting."
+			exit 1
+		fi
+		exit 1
+	fi
 }
 
 function conf_commit {
@@ -292,7 +325,7 @@ eo D
 
 # Preinstall checks.
 
-check_root
-check_release
-check_dep
+#check_root
+#check_release
 gather_info
+#check_dep
