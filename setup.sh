@@ -229,12 +229,20 @@ function check_dep {
 		eo Y "Is gridcoin daemon found?"
 	else
 		eo N "Is gridcoin daemon found?"
+		eo E "Must have gridcoin installed. Exiting."
 		exit 1
 	fi
 	if [[ -a /usr/sbin/netdata ]]
 	then
 		eo Y "Is netdata installed?"
+	else
+		eo N "Is netdata installed?"
+		eo E "Must have netdata installed. Exiting."
+		exit 1
 	fi
+	if [[ -a /bin/systemd ]]
+	then
+		eo Y "Is systemd installed?"
 }
 
 # Does config file exist? If so what shall you do!
@@ -562,28 +570,38 @@ function conf_gather {
         eo D "Lets gather information about your custom setup."
 	eo I "If you leave the value empty the default option will be selected."
 	eo D
-#	conf_set_grcuser
-#	conf_set_grcpath
-#	conf_set_grcapp
-#	conf_set_freegeoipport
+	conf_set_grcuser
+	conf_set_grcpath
+	conf_set_grcapp
+	conf_set_freegeoipport
 	eo D "Lets set systemd timer/dealys"
         eo W "Service timers must be set as #s. Example 5s"
 	eo W "Service delays must be set as #min. Example 7min"
 	eo W "This install only supports seconds and minutes as it is pointless to be higher then that."
 	eo W "Delays are default 7min to allow time for gridcoin daemon to fully start as it takes time."
-#	conf_set_getinfotimer
-#	conf_set_getinfodelay
+	conf_set_getinfotimer
+	conf_set_getinfodelay
 	conf_set_getgeotimer
 	conf_set_getgeodelay
 	conf_set_getmarkettimer
 	conf_set_getmarketdelay
-#	conf_commit
+	conf_commit
+	return 1
 }
 
 function conf_commit {
 
 	eo D "Writing config. Config file is location is /usr/local/bin/grc-netdata.conf"
-
+	echo "GRCUSER=$GRCUSER" > $GRCCONF
+	echo "GRCPATH=$GRCPATH" >> $GRCCONF
+	echo "GRCAPP=$GRCAPP" >> $GRCCONF
+	echo "FREEGEOIPPORT=$FREEGEOIPPORT" >> $GRCCONF
+	echo "Note1=This config only has basics it needs" >> $GRCCONF
+	echo "Note2=If you change this config make sure you restart the corresponding service or application." >> $GRCCONF
+	echo "Note3=Systemd timer/delays are in /etc/systemd/system/" >> $GRCCONF
+	echo "Note4=If you change FREEGEOIPPORT you must also edit contrab for GRCUSER to the updated port." >> $GRCCONF
+	eo D "Written config file."
+	return 1
 }
 
 # Start here
@@ -596,10 +614,7 @@ eo I "STDERR information is stored in setup.err"
 eo D
 eo D "Running preinstall checks."
 eo D
-
-# Preinstall checks.
-
-#check_root
-#check_release
+check_root
+check_release
 gather_info
-#check_dep
+check_dep
