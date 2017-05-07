@@ -60,6 +60,7 @@ function eo {
 		echo BAD SYNTAX ON EOUT
 		exit 1
 	fi
+	return 1
 }
 
 # Ask a question and place it in a value from outside of a function that I choose.
@@ -102,6 +103,7 @@ function check_root {
 		eo E "Exiting."
 		exit 1
 	fi
+	return 1
 
 }
 
@@ -203,46 +205,6 @@ function conf_reset {
 	GETMARKETTIMER="15s"
 	GETMARKETDELAY="7mins"
 	return 1
-}
-
-# Check for dependencies for install and GRC-Netdata
-
-function check_dep {
-
-	eo D "Checking for dependencies.."
-	if [[ -a /usr/bin/jq ]]
-	then
-		eo Y "Is 'jq' installed?"
-	else
-		eo N "Is 'jq' installed?"
-		dep_jq
-	fi
-	if [[ -a /usr/bin/bc ]]
-	then
-		eo Y "Is 'bc' installed?"
-	else
-		eo N "Is 'bc' installed?"
-		dep_bc
-	fi
-	if [[ -a $GRCAPP ]]
-	then
-		eo Y "Is gridcoin daemon found?"
-	else
-		eo N "Is gridcoin daemon found?"
-		eo E "Must have gridcoin installed. Exiting."
-		exit 1
-	fi
-	if [[ -a /usr/sbin/netdata ]]
-	then
-		eo Y "Is netdata installed?"
-	else
-		eo N "Is netdata installed?"
-		eo E "Must have netdata installed. Exiting."
-		exit 1
-	fi
-	if [[ -a /bin/systemd ]]
-	then
-		eo Y "Is systemd installed?"
 }
 
 # Does config file exist? If so what shall you do!
@@ -587,7 +549,10 @@ function conf_gather {
 	conf_set_getmarketdelay
 	conf_commit
 	return 1
+
 }
+
+# conf_commit just as it sounds.
 
 function conf_commit {
 
@@ -602,6 +567,233 @@ function conf_commit {
 	echo "Note4=If you change FREEGEOIPPORT you must also edit contrab for GRCUSER to the updated port." >> $GRCCONF
 	eo D "Written config file."
 	return 1
+
+}
+
+# Check for dependencies for install and GRC-Netdata
+
+function check_dep {
+
+	eo D "Updating apt-get"
+	apt-get update "$STD"
+        eo D "Checking for dependencies.."
+        if [[ -a /usr/bin/jq ]]
+        then
+                eo Y "Is 'jq' installed?"
+        else
+                eo N "Is 'jq' installed?"
+                dep_jq
+        fi
+        if [[ -a /usr/bin/bc ]]
+        then
+                eo Y "Is 'bc' installed?"
+        else
+                eo N "Is 'bc' installed?"
+                dep_bc
+        fi
+        if [[ -a $GRCAPP ]]
+        then
+                eo Y "Is gridcoin daemon found?"
+        else
+                eo N "Is gridcoin daemon found?"
+                eo E "Must have gridcoin installed. Exiting."
+                exit 1
+        fi
+        if [[ -a /usr/sbin/netdata ]]
+        then
+                eo Y "Is netdata installed?"
+        else
+                eo N "Is netdata installed?"
+                eo E "Must have netdata installed. Exiting."
+                exit 1
+        fi
+        if [[ -a /bin/systemd ]]
+        then
+                eo Y "Is 'systemd' installed?"
+	else
+		eo N "Is 'systemd' installed?"
+		dep_systemd
+	fi
+	if [[ -a /usr/bin/curl ]]
+	then
+		eo Y "Is 'curl' installed?"
+	else
+		eo N "Is 'curl' installed?"
+		dep_curl
+	fi
+	if [[ -a /usr/bin/pgrep ]]
+	then
+		eo Y "Is 'pgrep' of procps installed?"
+	else
+		eo N "Is 'pgrep' of procps installed?"
+		dep_procps
+	fi
+	if [[ -a /usr/bin/crontab ]]
+	then
+		eo Y "Is 'crontab' installed?"
+	else
+		eo N "Is 'crontab' installed?"
+		dep_crontab
+	fi
+	if [[ -a /usr/bin/wget ]]
+	then
+		eo Y "Is 'wget' installed?"
+	else
+		eo N "Is 'wget' installed?"
+		dep_wget
+	fi
+	return 1
+}
+
+# install bc
+
+function dep_bc {
+
+	if [[ "$os" == "1" ]]
+	then
+		eo D "Installing 'bc'"
+		apt-get -y install bc "$STD"
+		eo D "Done.
+	fi
+	return 1
+
+}
+
+# install jq
+
+function dep_jq {
+
+	if [[ "$os" == "1" ]]
+	then
+		eo D "Installing 'jq'"
+		apt-get -y install jq "$STD"
+		eo D "Dont.
+	fi
+	return 1
+
+}
+
+# install curl
+
+function dep_curl {
+
+	if [[ "$os" == "1" ]]
+	then
+		eo D "Installing 'curl'"
+		apt-get -y install curl "$STD"
+		eo D "Done."
+	fi
+	return 1
+
+}
+
+# install systemd
+
+function dep_systemd {
+
+	if [[ "$os" == "1" ]]
+	then
+		eo D "Installing 'systemd'"
+		apt-get -y install systemd "$STD"
+		eo D "Done."
+	fi
+	return 1
+
+}
+
+# install procps for pgrep
+
+function dep_procps {
+
+	if [[ "$os" == "1" ]]
+	then
+		eo D "Installing 'pgrep' from procps."
+		apt-get -y install procps "$STD"
+		eo D "Done."
+	fi
+	return 1
+
+}
+
+# install crontab
+
+function dep_crontab {
+
+	if [[ "$os" == "1" ]]
+	then
+		eo D "Installing 'crontab' from systemd-cron."
+		apt-get -y install systemd-cron "$STD"
+		eo D "Done."
+	fi
+	return 1
+
+}
+
+# install wget
+
+function dep_wget {
+
+	if [[ "$os" == "1" ]]
+	then
+		eo D "Installing 'wget'"
+		apt-get -y install wget "$STD"
+		eo D "Done."
+	fi
+	return 1
+
+}
+
+# install charts
+
+function install_charts {
+
+	echo D "Installing charts."
+	CHARTS="/usr/libexec/netdata/charts.d"
+	cp -f gridcoinmain.chart.sh "$CHARTS $STD"
+	cp -f gridcoinmarket.chart.sh "$CHARTS $STD"
+	echo D "Making charts executable."
+	chmod +x "$CHARTS/gridcoinmain.chart.sh $STD" 
+	chmod +x "$CHARTS/gridcoinmarket.chart.sh STD"
+	echo D "Done."
+	return 1
+
+}
+
+# install scripts
+
+function install_scripts {
+
+	echo D "Installing scripts."
+	cp -f gridcoinmain.sh "$BINFOLDER/gridcoinmain.sh $STD"
+	cp -f gridcoinmarket.sh "$BINFOLDER/gridcoinmarket.sh $STD"
+	cp -f gridcoingeo.sh "$BINFOLDER/gridcoingeo.sh $STD"
+	echo D "Making scripts executable."
+	chmod +x "$BINFOLDER/gridcoinmain.sh $STD"
+	chmod +x "$BINFOLDER/gridcoinmarket.sh $STD"
+	chmod +x "$BINFOLDER/gridcoingeo.sh $STD"
+	echo D "Done."
+	return 1
+
+}
+
+# install freegeoip + license + geo.json
+
+function install_freegeoip {
+
+	echo D "Installing freegeoip v3.2, license and geo.json translation file."
+	if [[ "$os" == "1" ]]
+	then
+		echo D "Downloading from fiorix/freegeoip on github."
+		wget -q https://github.com/fiorix/freegeoip/releases/download/v3.2/freegeoip-3.2-linux-amd64.tar.gz "$STD"
+		echo D "Extracting archive."
+		tar -zxf freegeoip-3.2-linux-amd64.tar.gz freegeoip-3.2-linux-amd64/freegeoip "$STD"
+		echo D "Installing files."
+		cp -f freegeoip-3.2-linux-amd64/freegeoip "$BINFOLDER $STD"
+		cp -f geo.json "$BINFOLDER $STD"
+		cp -f freegeoip.license "$BINFOLDER $STD"
+		echo D "done."
+		return 1
+	fi
 }
 
 # Start here
@@ -618,3 +810,5 @@ check_root
 check_release
 gather_info
 check_dep
+install_charts
+install_scripts
