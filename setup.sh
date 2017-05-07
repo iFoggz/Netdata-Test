@@ -107,7 +107,7 @@ function check_root {
 
 }
 
-# Release check (2 methods)
+# Release check (5 releases -- need to be tested!) outputs as Ubuntu Debian Fedora SUSE LINUX / Arch
 
 function check_release {
 
@@ -122,24 +122,60 @@ function check_release {
 			eo I "Installing for Ubuntu/Debian."
 			os="1"
 			return 1
+		elif [[ "$osrelease" == "Fedora" ]]
+		then
+			eo I "Release is $osrelease"
+			eo I "Installing for Fedora."
+			os="2"
+			return 1
+                elif [[ "$osrelease" == "SUSE LINUX" ]]
+                then
+                        eo I "Release is $osrelease"
+                        eo I "Installing for SUSE LINUX."
+                        os="3"
+                        return 1
+                elif [[ "$osrelease" == "Arch" ]]
+                then
+                        eo I "Release is $osrelease"
+                        eo I "Installing for Arch."
+                        os="4"
+                        return 1
 		else
 			eo I "Release is $osrelease"
 			eo E "$osrelease is currently not supported."
 			eo E "Exiting."
 			exit 1
 		fi
+
 	else
 		eo N "Was lsb_release found?"
 	fi
 	eo D "List of supported releases:"
 	eo O "1) Ubuntu/Debian"
-	eo O "2) Not yet implemented"
+	eo O "2) Fedora"
+	eo O "3) SUSE LINUX"
+	eo O "4) ARCH"
 	ei 1 os_release "Please select your distribution:"
 	if [[ "$os_release" == "1" ]]
 	then
 		eo I "Installing for Ubuntu/Debian."
 		os="1"
 		return 1
+	elif [[ "$osrelease" == "2" ]]
+	then
+		eo I "Installing for Fedora."
+		os="2"
+		return 1
+        elif [[ "$osrelease" == "3" ]]
+        then
+                eo I "Installing for SUSE LINUX."
+                os="3"
+                return 1
+        elif [[ "$osrelease" == "4" ]]
+        then
+                eo I "Installing for ARCH."
+                os="4"
+                return 1
 	else
 		eo E "Bad input."
 		eo E "Exiting."
@@ -574,8 +610,50 @@ function conf_commit {
 
 function check_dep {
 
-	eo D "Updating apt-get"
-	apt-get update "$STD"
+	if [[ "$os" == "1" ]]
+	then
+		if [[ -a /usr/bin/apt-get ]]
+		then
+			eo D "Updating apt-get."
+			apt-get update "$STD"
+		else
+			eo E "apt-get not installed. Exiting."
+			exit 1
+		fi
+	elif [[ "$os" == "2" ]]
+	then
+                if [[ -a /bin/dnf ]]
+                then
+                        eo D "Updating dnf."
+                        dnf update "$STD"
+                else
+                        eo E "dnf not installed. Exiting."
+                        exit 1
+                fi
+	elif [[ "$os" == "3" ]]
+	then
+		if [[ -a /usr/bin/zypper ]]
+		then
+			eo D "Updating zypper."
+			zypper update "$STD"
+		else
+			eo E "zypper not installed. Exiting."
+			exit 1
+		fi
+	elif [[ "$os" == "4" ]]
+	then
+		if [[ -a /usr/bin/pacman ]]
+		then
+			eo D "Updating pacman."
+			pacman update "$STD"
+		else
+			eo E "pacman not installed. Exiting."
+			exit 1
+		fi
+	else
+		# Future additions here
+		exit 1
+	fi
         eo D "Checking for dependencies.."
         if [[ -a /usr/bin/jq ]]
         then
@@ -612,7 +690,8 @@ function check_dep {
                 eo Y "Is 'systemd' installed?"
 	else
 		eo N "Is 'systemd' installed?"
-		dep_systemd
+		eo E "systemd is required for this install. Exiting."
+		exit 1
 	fi
 	if [[ -a /usr/bin/curl ]]
 	then
@@ -633,7 +712,8 @@ function check_dep {
 		eo Y "Is 'crontab' installed?"
 	else
 		eo N "Is 'crontab' installed?"
-		dep_crontab
+		eo E "crontab is required for this install. Exiting."
+		exit 1
 	fi
 	if [[ -a /usr/bin/wget ]]
 	then
@@ -651,9 +731,27 @@ function dep_bc {
 
 	if [[ "$os" == "1" ]]
 	then
-		eo D "Installing 'bc'"
+		eo D "Installing 'bc' with apt-get."
 		apt-get -y install bc "$STD"
-		eo D "Done.
+		eo D "Done."
+	elif [[ "$os" == "2" ]]
+	then
+		eo D "Installing 'bc' with dnf."
+		dnf -y install bc "$STD"
+		eo D "Done."
+        elif [[ "$os" == "3" ]]
+        then
+                eo D "Installing 'bc' with zypper."
+                zypper -y install bc "$STD"
+                eo D "Done."
+        elif [[ "$os" == "4" ]]
+        then
+                eo D "Installing 'bc' with pacman."
+                pacman --noconfirm install bc "$STD"
+                eo D "Done."
+	else
+		# Future additions here
+		exit 1
 	fi
 	return 1
 
@@ -665,9 +763,28 @@ function dep_jq {
 
 	if [[ "$os" == "1" ]]
 	then
-		eo D "Installing 'jq'"
+		eo D "Installing 'jq' with apt-get."
 		apt-get -y install jq "$STD"
-		eo D "Dont.
+		eo D "Done"
+	fi
+        elif [[ "$os" == "2" ]]
+        then
+                eo D "Installing 'jq' with dnf."
+                dnf -y install jq "$STD"
+                eo D "Done."
+        elif [[ "$os" == "3" ]]
+        then
+                eo D "Installing 'jq' with zypper."
+                zypper -y install jq "$STD"
+                eo D "Done."
+        elif [[ "$os" == "4" ]]
+        then
+                eo D "Installing 'jq' with pacman."
+                pacman --noconfirm install jq "$STD"
+                eo D "Done."
+        else
+                # Future additions here
+                exit 1
 	fi
 	return 1
 
@@ -679,51 +796,59 @@ function dep_curl {
 
 	if [[ "$os" == "1" ]]
 	then
-		eo D "Installing 'curl'"
+		eo D "Installing 'curl' with apt-get."
 		apt-get -y install curl "$STD"
 		eo D "Done."
+        elif [[ "$os" == "2" ]]
+        then
+                eo D "Installing 'curl' with dnf."
+                dnf -y install curl "$STD"
+                eo D "Done."
+        elif [[ "$os" == "3" ]]
+        then
+                eo D "Installing 'curl' with zypper."
+                zypper -y install curl "$STD"
+                eo D "Done."
+        elif [[ "$os" == "4" ]]
+        then
+                eo D "Installing 'curl' with pacman."
+                pacman --noconfirm install curl "$STD"
+                eo D "Done."
+        else
+                # Future additions here
+                exit 1
 	fi
 	return 1
 
 }
 
-# install systemd
-
-function dep_systemd {
-
-	if [[ "$os" == "1" ]]
-	then
-		eo D "Installing 'systemd'"
-		apt-get -y install systemd "$STD"
-		eo D "Done."
-	fi
-	return 1
-
-}
-
-# install procps for pgrep
+# Install procps for pgrep
 
 function dep_procps {
 
 	if [[ "$os" == "1" ]]
 	then
-		eo D "Installing 'pgrep' from procps."
+		eo D "Installing 'pgrep' from procps with apt-get."
 		apt-get -y install procps "$STD"
 		eo D "Done."
-	fi
-	return 1
-
-}
-
-# install crontab
-
-function dep_crontab {
-
-	if [[ "$os" == "1" ]]
-	then
-		eo D "Installing 'crontab' from systemd-cron."
-		apt-get -y install systemd-cron "$STD"
-		eo D "Done."
+        elif [[ "$os" == "2" ]]
+        then
+                eo D "Installing 'pgrep' from procps-ng with dnf."
+                dnf -y install procps-ng "$STD"
+                eo D "Done."
+        elif [[ "$os" == "3" ]]
+        then
+                eo D "Installing 'pgrep' from procps with zypper."
+                zypper -y install procps "$STD"
+                eo D "Done."
+        elif [[ "$os" == "4" ]]
+        then
+                eo D "Installing 'pgrep' from procps-ng with pacman."
+                pacman --noconfirm install procps-ng "$STD"
+                eo D "Done."
+        else
+                # Future additions here
+                exit 1
 	fi
 	return 1
 
@@ -735,10 +860,28 @@ function dep_wget {
 
 	if [[ "$os" == "1" ]]
 	then
-		eo D "Installing 'wget'"
+		eo D "Installing 'wget' with apt-get."
 		apt-get -y install wget "$STD"
 		eo D "Done."
 	fi
+        elif [[ "$os" == "2" ]]
+        then
+                eo D "Installing 'wget' with dnf."
+                dnf -y install wget "$STD"
+                eo D "Done."
+        elif [[ "$os" == "3" ]]
+        then
+                eo D "Installing 'wget' with zypper."
+                zypper -y install wget "$STD"
+                eo D "Done."
+        elif [[ "$os" == "4" ]]
+        then
+                eo D "Installing 'wget' with pacman."
+                pacman --noconfirm install wget "$STD"
+                eo D "Done."
+        else
+                # Future additions here
+                exit 1
 	return 1
 
 }
