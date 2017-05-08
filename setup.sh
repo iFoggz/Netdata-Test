@@ -25,7 +25,6 @@ TO="\033[1;m[>]\033[m"
 # Hardcoded Values
 GRCCONF="/usr/local/bin/grc-netdata.conf"
 BINFOLDER="/usr/local/bin"
-STD=" 1> /dev/null 2> setup.err"
 #
 # Functions here
 
@@ -262,7 +261,7 @@ function conf_exists {
 		elif [[ "$keepconfigcase" == "N" ]]
 		then
 			eo I "Removing previous config as requested."
-			rm -f "$GRCCONF" "$STD"
+			rm -f "$GRCCONF"
 			return 1
 		else
 			eo E "Bad input. Try again."
@@ -615,7 +614,7 @@ function check_dep {
 		if [[ -a /usr/bin/apt-get ]]
 		then
 			eo D "Updating apt-get."
-			apt-get update "$STD"
+			apt-get update
 		else
 			eo E "apt-get not installed. Exiting."
 			exit 1
@@ -625,7 +624,7 @@ function check_dep {
                 if [[ -a /bin/dnf ]]
                 then
                         eo D "Updating dnf."
-                        dnf update "$STD"
+                        dnf update 
                 else
                         eo E "dnf not installed. Exiting."
                         exit 1
@@ -635,7 +634,7 @@ function check_dep {
 		if [[ -a /usr/bin/zypper ]]
 		then
 			eo D "Updating zypper."
-			zypper update "$STD"
+			zypper update 
 		else
 			eo E "zypper not installed. Exiting."
 			exit 1
@@ -645,7 +644,7 @@ function check_dep {
 		if [[ -a /usr/bin/pacman ]]
 		then
 			eo D "Updating pacman."
-			pacman update "$STD"
+			pacman update 
 		else
 			eo E "pacman not installed. Exiting."
 			exit 1
@@ -732,22 +731,22 @@ function dep_bc {
 	if [[ "$os" == "1" ]]
 	then
 		eo D "Installing 'bc' with apt-get."
-		apt-get -y install bc "$STD"
+		apt-get -y install bc
 		eo D "Done."
 	elif [[ "$os" == "2" ]]
 	then
 		eo D "Installing 'bc' with dnf."
-		dnf -y install bc "$STD"
+		dnf -y install bc
 		eo D "Done."
         elif [[ "$os" == "3" ]]
         then
                 eo D "Installing 'bc' with zypper."
-                zypper -y install bc "$STD"
+                zypper -y install bc
                 eo D "Done."
         elif [[ "$os" == "4" ]]
         then
                 eo D "Installing 'bc' with pacman."
-                pacman --noconfirm install bc "$STD"
+                pacman --noconfirm install bc
                 eo D "Done."
 	else
 		# Future additions here
@@ -764,23 +763,22 @@ function dep_jq {
 	if [[ "$os" == "1" ]]
 	then
 		eo D "Installing 'jq' with apt-get."
-		apt-get -y install jq "$STD"
+		apt-get -y install jq
 		eo D "Done"
-	fi
         elif [[ "$os" == "2" ]]
         then
                 eo D "Installing 'jq' with dnf."
-                dnf -y install jq "$STD"
+                dnf -y install jq
                 eo D "Done."
         elif [[ "$os" == "3" ]]
         then
                 eo D "Installing 'jq' with zypper."
-                zypper -y install jq "$STD"
+                zypper -y install jq
                 eo D "Done."
         elif [[ "$os" == "4" ]]
         then
                 eo D "Installing 'jq' with pacman."
-                pacman --noconfirm install jq "$STD"
+                pacman --noconfirm install jq
                 eo D "Done."
         else
                 # Future additions here
@@ -797,22 +795,22 @@ function dep_curl {
 	if [[ "$os" == "1" ]]
 	then
 		eo D "Installing 'curl' with apt-get."
-		apt-get -y install curl "$STD"
+		apt-get -y install curl
 		eo D "Done."
         elif [[ "$os" == "2" ]]
         then
                 eo D "Installing 'curl' with dnf."
-                dnf -y install curl "$STD"
+                dnf -y install curl
                 eo D "Done."
         elif [[ "$os" == "3" ]]
         then
                 eo D "Installing 'curl' with zypper."
-                zypper -y install curl "$STD"
+                zypper -y install curl
                 eo D "Done."
         elif [[ "$os" == "4" ]]
         then
                 eo D "Installing 'curl' with pacman."
-                pacman --noconfirm install curl "$STD"
+                pacman --noconfirm install curl
                 eo D "Done."
         else
                 # Future additions here
@@ -829,22 +827,22 @@ function dep_procps {
 	if [[ "$os" == "1" ]]
 	then
 		eo D "Installing 'pgrep' from procps with apt-get."
-		apt-get -y install procps "$STD"
+		apt-get -y install procps
 		eo D "Done."
         elif [[ "$os" == "2" ]]
         then
                 eo D "Installing 'pgrep' from procps-ng with dnf."
-                dnf -y install procps-ng "$STD"
+                dnf -y install procps-ng
                 eo D "Done."
         elif [[ "$os" == "3" ]]
         then
                 eo D "Installing 'pgrep' from procps with zypper."
-                zypper -y install procps "$STD"
+                zypper -y install procps
                 eo D "Done."
         elif [[ "$os" == "4" ]]
         then
                 eo D "Installing 'pgrep' from procps-ng with pacman."
-                pacman --noconfirm install procps-ng "$STD"
+                pacman --noconfirm install procps-ng
                 eo D "Done."
         else
                 # Future additions here
@@ -861,27 +859,27 @@ function dep_wget {
 	if [[ "$os" == "1" ]]
 	then
 		eo D "Installing 'wget' with apt-get."
-		apt-get -y install wget "$STD"
+		apt-get -y install wget
 		eo D "Done."
-	fi
         elif [[ "$os" == "2" ]]
         then
                 eo D "Installing 'wget' with dnf."
-                dnf -y install wget "$STD"
+                dnf -y install wget
                 eo D "Done."
         elif [[ "$os" == "3" ]]
         then
                 eo D "Installing 'wget' with zypper."
-                zypper -y install wget "$STD"
+                zypper -y install wget
                 eo D "Done."
         elif [[ "$os" == "4" ]]
         then
                 eo D "Installing 'wget' with pacman."
-                pacman --noconfirm install wget "$STD"
+                pacman --noconfirm install wget
                 eo D "Done."
         else
                 # Future additions here
                 exit 1
+	fi
 	return 1
 
 }
@@ -890,14 +888,14 @@ function dep_wget {
 
 function install_charts {
 
-	echo D "Installing charts."
+	eo D "Installing charts."
 	CHARTS="/usr/libexec/netdata/charts.d"
-	cp -f gridcoinmain.chart.sh "$CHARTS $STD"
-	cp -f gridcoinmarket.chart.sh "$CHARTS $STD"
-	echo D "Making charts executable."
-	chmod +x "$CHARTS/gridcoinmain.chart.sh $STD" 
-	chmod +x "$CHARTS/gridcoinmarket.chart.sh STD"
-	echo D "Done."
+	cp -f gridcoinmain.chart.sh $CHARTS
+	cp -f gridcoinmarket.chart.sh $CHARTS
+	eo D "Making charts executable."
+	chmod +x $CHARTS/gridcoinmain.chart.sh
+	chmod +x $CHARTS/gridcoinmarket.chart.sh
+	eo D "Done."
 	return 1
 
 }
@@ -906,15 +904,15 @@ function install_charts {
 
 function install_scripts {
 
-	echo D "Installing scripts."
-	cp -f gridcoinmain.sh "$BINFOLDER/gridcoinmain.sh $STD"
-	cp -f gridcoinmarket.sh "$BINFOLDER/gridcoinmarket.sh $STD"
-	cp -f gridcoingeo.sh "$BINFOLDER/gridcoingeo.sh $STD"
-	echo D "Making scripts executable."
-	chmod +x "$BINFOLDER/gridcoinmain.sh $STD"
-	chmod +x "$BINFOLDER/gridcoinmarket.sh $STD"
-	chmod +x "$BINFOLDER/gridcoingeo.sh $STD"
-	echo D "Done."
+	eo D "Installing scripts."
+	cp -f gridcoinmain.sh "$BINFOLDER/gridcoinmain.sh"
+	cp -f gridcoinmarket.sh "$BINFOLDER/gridcoinmarket.sh"
+	cp -f gridcoingeo.sh "$BINFOLDER/gridcoingeo.sh"
+	eo D "Making scripts executable."
+	chmod +x "$BINFOLDER/gridcoinmain.sh"
+	chmod +x "$BINFOLDER/gridcoinmarket.sh"
+	chmod +x "$BINFOLDER/gridcoingeo.sh"
+	eo D "Done."
 	return 1
 
 }
@@ -926,26 +924,163 @@ function install_freegeoip {
 	echo D "Installing freegeoip v3.2, license and geo.json translation file."
 	if [[ "$os" == "1" ]]
 	then
-		echo D "Downloading from fiorix/freegeoip on github."
-		wget -q https://github.com/fiorix/freegeoip/releases/download/v3.2/freegeoip-3.2-linux-amd64.tar.gz "$STD"
-		echo D "Extracting archive."
-		tar -zxf freegeoip-3.2-linux-amd64.tar.gz freegeoip-3.2-linux-amd64/freegeoip "$STD"
-		echo D "Installing files."
-		cp -f freegeoip-3.2-linux-amd64/freegeoip "$BINFOLDER $STD"
-		cp -f geo.json "$BINFOLDER $STD"
-		cp -f freegeoip.license "$BINFOLDER $STD"
+		eo D "Downloading from fiorix/freegeoip on github."
+		wget https://github.com/fiorix/freegeoip/releases/download/v3.2/freegeoip-3.2-linux-amd64.tar.gz
+		eo D "Extracting archive."
+		tar -zxf freegeoip-3.2-linux-amd64.tar.gz freegeoip-3.2-linux-amd64/freegeoip
+		eo D "Installing files."
+		cp -f freegeoip-3.2-linux-amd64/freegeoip "$BINFOLDER"
+		cp -f geo.json "$BINFOLDER"
+		cp -f freegeoip.license "$BINFOLDER"
 		echo D "done."
 		return 1
 	fi
 }
+
+# install service files
+
+function install_service {
+
+	SERVICE="/etc/systemd/system"
+	eo D "Writing service files to $SERVICE."
+	# gridcoinmain.timer/delay
+	echo "[Unit]" > $SERVICE/gridcoinmain.timer
+	echo "Description=Runs gridcoin main chart scrape service timer" >> $SERVICE/gridcoinmain.timer
+	echo "" >> $SERVICE/gridcoinmain.timer
+	echo "[Timer]" >> $SERVICE/gridcoinmain.timer
+	echo "OnUnitActiveSec=$GETINFOTIMER" >> $SERVICE/gridcoinmain.timer
+	echo "OnBootSec=$GETINFODELAY" >> $SERVICE/gridcoinmain.timer
+	echo "" >> $SERVICE/gridcoinmain.timer
+	echo "[Install]" >> $SERVICE/gridcoinmain.timer
+	echo "WantedBy=multi-user.target" >> $SERVICE/gridcoinmain.timer
+	echo "[Unit]" > $SERVICE/gridcoinmain.service
+	echo "Description=Run the collection script for the gridcoin main chart scrape" >> $SERVICE/gridcoinmain.service
+	echo "After=netdata.service" >> $SERVICE/gridcoinmain.service
+	echo "" >> $SERVICE/gridcoinmain.service
+	echo "[Service]" >> $SERVICE/gridcoinmain.service
+	echo "Type=oneshot" >> $SERVICE/gridcoinmain.service
+	echo "User=$GRCUSER" >> $SERVICE/gridcoinmain.service
+	echo "ExecStart=/bin/bash /usr/local/bin/gridcoinmain.sh" >> $SERVICE/gridcoinmain.service
+	# gridcoinmarket.timer/delay
+        echo "[Unit]" > $SERVICE/gridcoinmarket.timer
+        echo "Description=Runs gridcoin market chart scrape service timer" >> $SERVICE/gridcoinmarket.timer
+        echo "" >> $SERVICE/gridcoinmarket.timer
+        echo "[Timer]" >> $SERVICE/gridcoinmarket.timer
+        echo "OnUnitActiveSec=$GETMARKETTIMER" >> $SERVICE/gridcoinmarket.timer
+        echo "OnBootSec=$GETMARKETDELAY" >> $SERVICE/gridcoinmarket.timer
+        echo "" >> $SERVICE/gridcoinmarket.timer
+        echo "[Install]" >> $SERVICE/gridcoinmarket.timer
+        echo "WantedBy=multi-user.target" >> $SERVICE/gridcoinmarket.timer
+        echo "[Unit]" > $SERVICE/gridcoinmarket.service
+        echo "Description=Run the collection script for the gridcoin market chart scrape" >> $SERVICE/gridcoinmarket.service
+        echo "After=netdata.service" >> $SERVICE/gridcoinmarket.service
+        echo "" >> $SERVICE/gridcoinmarket.service
+        echo "[Service]" >> $SERVICE/gridcoinmarket.service
+        echo "Type=oneshot" >> $SERVICE/gridcoinmarket.service
+        echo "User=$GRCUSER" >> $SERVICE/gridcoinmarket.service
+        echo "ExecStart=/bin/bash /usr/local/bin/gridcoinmarket.sh" >> $SERVICE/gridcoinmarket.service
+	# gridcoingeo.timer/delay
+        echo "[Unit]" > $SERVICE/gridcoingeo.timer
+        echo "Description=Runs gridcoin geography chart scrape service timer" >> $SERVICE/gridcoingeo.timer
+        echo "" >> $SERVICE/gridcoingeo.timer
+        echo "[Timer]" >> $SERVICE/gridcoingeo.timer
+        echo "OnUnitActiveSec=$GETGEOTIMER" >> $SERVICE/gridcoingeo.timer
+        echo "OnBootSec=$GETGEODELAY" >> $SERVICE/gridcoingeo.timer
+        echo "" >> $SERVICE/gridcoingeo.timer
+        echo "[Install]" >> $SERVICE/gridcoingeo.timer
+        echo "WantedBy=multi-user.target" >> $SERVICE/gridcoingeo.timer
+        echo "[Unit]" > $SERVICE/gridcoingeo.service
+        echo "Description=Run the collection script for the gridcoin geography chart scrape" >> $SERVICE/gridcoingeo.service
+        echo "After=netdata.service" >> $SERVICE/gridcoingeo.service
+        echo "" >> $SERVICE/gridcoingeo.service
+        echo "[Service]" >> $SERVICE/gridcoingeo.service
+        echo "Type=oneshot" >> $SERVICE/gridcoingeo.service
+        echo "User=$GRCUSER" >> $SERVICE/gridcoingeo.service
+        echo "ExecStart=/bin/bash /usr/local/bin/gridcoingeo.sh" >> $SERVICE/gridcoingeo.service
+	crontabinput=$(crontab -l -u $GRCUSER)
+	newline=$'\n'
+	skipcrontab="0"
+        while read -r crontabread; do
+		if [[ "$crontabread" == *"freegeoip"* ]]
+		then
+			skipcrontab="1"
+			break
+		else
+			continue
+		fi
+	done <<< $crontabinput
+	if [[ "$skipcrontab" == "1" ]]
+	then
+		eo Y "Does crontab entry exist for freegeoip?"
+                eo W "Existing contrab entry for $GRCUSER for freegeoip."
+                eo W "Will not write new entry however if you've changed what port to use for freegeoip please edit crontab for user $GRCUSER"
+                eo D "Skipping entry. Use crontab -u $GRCUSER -e to edit users crontab"
+	else
+		eo N "Does crontab entry exist for freegeoip?"
+		crontabnew="@reboot /usr/local/bin/freegeoip -http 127.0.0.1:$FREEGEOIPPORT -silent &"
+		crontaboutput="$crontabinput$newline$crontabnew"
+		echo "$crontaboutput" | crontab -u $GRCUSER -
+	fi
+	eo D "Done."
+	return 1
+}
+
+# function enable services and crontab with permission
+
+function startup {
+
+	eo D "Enabling services."
+        systemctl enable gridcoinmain.timer
+        systemctl enable gridcoinmarket.timer
+        systemctl enable gridcoingeo.timer
+	systemctl daemon-reload 
+	eo D "Done."
+	eo I "We need to startup freegeoip and services related to GRC-Netdata."
+	ei 1 startup "May I start up these? (Y/N):"
+	case "$startup" in
+		Y|y ) startupcase="Y";;
+		N|n ) startupcase="N";;
+	esac
+	if [[ "$startupcase" == "Y" ]]
+	then
+		eo D "freegeoip will run with sudo -u $GRCUSER this time however will run under $GRCUSER crontab after reboot automatically."
+		sudo -u $GRCUSER /usr/local/bin/freegeoip -http 127.0.0.1:$FREEGEOIPPORT -silent &
+		systemctl start gridcoinmain.timer
+		systemctl start gridcoinmarket.timer
+		systemctl start gridcoingeo.timer
+	elif [[ "$startupcase" == "N" ]]
+	then
+		eo W "Not starting services please check readme.md about how to start services and freegeoip."
+	else
+		eo E "Bad input. read readme.md about manually starting."
+		return 1
+	fi
+	ei 1 restart "We need to restart netdata to load new charts. May I? (Y/N):"
+	case "$restart" in
+		Y|y ) restartcase="Y";;
+		N|n ) restartcase="N";;
+	esac
+	if [[ "$restartcase" == "Y" ]]
+	then
+		eo D "Restart netdata service."
+		systemctl stop netdata.service
+		systemctl start netdata.service
+	elif [[ "$restartcase" == "N" ]]
+	then
+		eo D "Read readme.md about restarting netdata."
+	else
+		eo E "Bad input. read readme.md about manually restarting."
+		return 1
+	fi
+	return 1
+}
+
 
 # Start here
 
 echo
 echo
 eo D "Welcome to GRC-Netdata installation."
-eo D
-eo I "STDERR information is stored in setup.err"
 eo D
 eo D "Running preinstall checks."
 eo D
@@ -955,3 +1090,8 @@ gather_info
 check_dep
 install_charts
 install_scripts
+install_freegeoip
+install_service
+startup
+eo D "Setup is complete."
+exit 1
