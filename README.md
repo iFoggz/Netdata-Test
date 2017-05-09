@@ -18,6 +18,3 @@ chmod +x setup.sh
 
 # Notes
 * All required dependencies the scripts will use will be autoinstalled
-
-# Yup yup n yup
-# 15 years since I wrote a bash script.
