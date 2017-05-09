@@ -189,40 +189,15 @@ function gather_info {
 
 	eo D "Gathering information about your setup."
 	eo D
-	ei 1 default "Would you like to use the default setup? (Y/N):"
-	case "$default" in
-		Y|y ) defaultcase="Y";;
-		N|n ) defaultcase="N";;
-	esac
-	if [[ "$defaultcase" == "Y" ]]
+	conf_exists
+	if [[ "$keepconfigcase" == "Y" ]]
 	then
-		eo I "User opted for default config."
-		conf_exists
-		if [[ "$keepconfigcase" == "Y" ]]
-		then
-			return 1
-		else
-			conf_reset
-			conf_commit
-			return 1
-		fi
-	elif [[ "$defaultcase" == "N" ]]
-	then
-		eo I "User opted for custom config."
-		conf_exists
-		if [[ "$keepconfigcase" == "Y" ]]
-		then
-			return 1
-		else
-			conf_gather
-			return 1
-		fi
-	else
-		echo E "Invalid selection, starting over."
-		gather_info
 		return 1
 	fi
-
+        conf_reset
+        conf_gather
+        conf_commit
+	return 1
 }
 
 # conf_reset sets dafaults
@@ -582,7 +557,6 @@ function conf_gather {
 	conf_set_getgeodelay
 	conf_set_getmarkettimer
 	conf_set_getmarketdelay
-	conf_commit
 	return 1
 
 }
@@ -614,7 +588,7 @@ function check_dep {
 		if [[ -a /usr/bin/apt-get ]]
 		then
 			eo D "Updating apt-get."
-			apt-get update
+			apt-get update >> setup.log 2>> setup.err
 		else
 			eo E "apt-get not installed. Exiting."
 			exit 1
@@ -624,7 +598,7 @@ function check_dep {
                 if [[ -a /bin/dnf ]]
                 then
                         eo D "Updating dnf."
-                        dnf update 
+                        dnf update >> setup.log 2>> setup.err
                 else
                         eo E "dnf not installed. Exiting."
                         exit 1
@@ -634,7 +608,7 @@ function check_dep {
 		if [[ -a /usr/bin/zypper ]]
 		then
 			eo D "Updating zypper."
-			zypper update 
+			zypper update >> setup.log 2>> setup.err
 		else
 			eo E "zypper not installed. Exiting."
 			exit 1
@@ -644,7 +618,7 @@ function check_dep {
 		if [[ -a /usr/bin/pacman ]]
 		then
 			eo D "Updating pacman."
-			pacman update 
+			pacman update >> setup.log 2>> setup.err
 		else
 			eo E "pacman not installed. Exiting."
 			exit 1
@@ -667,14 +641,6 @@ function check_dep {
         else
                 eo N "Is 'bc' installed?"
                 dep_bc
-        fi
-        if [[ -a $GRCAPP ]]
-        then
-                eo Y "Is gridcoin daemon found?"
-        else
-                eo N "Is gridcoin daemon found?"
-                eo E "Must have gridcoin installed. Exiting."
-                exit 1
         fi
         if [[ -a /usr/sbin/netdata ]]
         then
@@ -731,22 +697,22 @@ function dep_bc {
 	if [[ "$os" == "1" ]]
 	then
 		eo D "Installing 'bc' with apt-get."
-		apt-get -y install bc
+		apt-get -y install bc >> setup.log 2>> setup.err
 		eo D "Done."
 	elif [[ "$os" == "2" ]]
 	then
 		eo D "Installing 'bc' with dnf."
-		dnf -y install bc
+		dnf -y install bc >> setup.log 2>> setup.err
 		eo D "Done."
         elif [[ "$os" == "3" ]]
         then
                 eo D "Installing 'bc' with zypper."
-                zypper -y install bc
+                zypper -y install bc >> setup.log 2>> setup.err
                 eo D "Done."
         elif [[ "$os" == "4" ]]
         then
                 eo D "Installing 'bc' with pacman."
-                pacman --noconfirm install bc
+                pacman --noconfirm install bc >> setup.log 2>> setup.err
                 eo D "Done."
 	else
 		# Future additions here
@@ -763,22 +729,22 @@ function dep_jq {
 	if [[ "$os" == "1" ]]
 	then
 		eo D "Installing 'jq' with apt-get."
-		apt-get -y install jq
+		apt-get -y install jq >> setup.log 2>> setup.err
 		eo D "Done"
         elif [[ "$os" == "2" ]]
         then
                 eo D "Installing 'jq' with dnf."
-                dnf -y install jq
+                dnf -y install jq >> setup.log 2>> setup.err
                 eo D "Done."
         elif [[ "$os" == "3" ]]
         then
                 eo D "Installing 'jq' with zypper."
-                zypper -y install jq
+                zypper -y install jq >> setup.log 2>> setup.err
                 eo D "Done."
         elif [[ "$os" == "4" ]]
         then
                 eo D "Installing 'jq' with pacman."
-                pacman --noconfirm install jq
+                pacman --noconfirm install jq >> setup.log 2>> setup.err
                 eo D "Done."
         else
                 # Future additions here
@@ -795,22 +761,22 @@ function dep_curl {
 	if [[ "$os" == "1" ]]
 	then
 		eo D "Installing 'curl' with apt-get."
-		apt-get -y install curl
+		apt-get -y install curl >> setup.log 2>> setup.err
 		eo D "Done."
         elif [[ "$os" == "2" ]]
         then
                 eo D "Installing 'curl' with dnf."
-                dnf -y install curl
+                dnf -y install curl >> setup.log 2>> setup.err
                 eo D "Done."
         elif [[ "$os" == "3" ]]
         then
                 eo D "Installing 'curl' with zypper."
-                zypper -y install curl
+                zypper -y install curl >> setup.log 2>> setup.err
                 eo D "Done."
         elif [[ "$os" == "4" ]]
         then
                 eo D "Installing 'curl' with pacman."
-                pacman --noconfirm install curl
+                pacman --noconfirm install curl >> setup.log 2>> setup.err
                 eo D "Done."
         else
                 # Future additions here
@@ -827,22 +793,22 @@ function dep_procps {
 	if [[ "$os" == "1" ]]
 	then
 		eo D "Installing 'pgrep' from procps with apt-get."
-		apt-get -y install procps
+		apt-get -y install procps >> setup.log 2>> setup.err
 		eo D "Done."
         elif [[ "$os" == "2" ]]
         then
                 eo D "Installing 'pgrep' from procps-ng with dnf."
-                dnf -y install procps-ng
+                dnf -y install procps-ng >> setup.log 2>> setup.err
                 eo D "Done."
         elif [[ "$os" == "3" ]]
         then
                 eo D "Installing 'pgrep' from procps with zypper."
-                zypper -y install procps
+                zypper -y install procps >> setup.log 2>> setup.err
                 eo D "Done."
         elif [[ "$os" == "4" ]]
         then
                 eo D "Installing 'pgrep' from procps-ng with pacman."
-                pacman --noconfirm install procps-ng
+                pacman --noconfirm install procps-ng >> setup.log 2>> setup.err
                 eo D "Done."
         else
                 # Future additions here
@@ -859,22 +825,22 @@ function dep_wget {
 	if [[ "$os" == "1" ]]
 	then
 		eo D "Installing 'wget' with apt-get."
-		apt-get -y install wget
+		apt-get -y install wget >> setup.log 2>> setup.err
 		eo D "Done."
         elif [[ "$os" == "2" ]]
         then
                 eo D "Installing 'wget' with dnf."
-                dnf -y install wget
+                dnf -y install wget >> setup.log 2>> setup.err
                 eo D "Done."
         elif [[ "$os" == "3" ]]
         then
                 eo D "Installing 'wget' with zypper."
-                zypper -y install wget
+                zypper -y install wget >> setup.log 2>> setup.err
                 eo D "Done."
         elif [[ "$os" == "4" ]]
         then
                 eo D "Installing 'wget' with pacman."
-                pacman --noconfirm install wget
+                pacman --noconfirm install wget >> setup.log 2>> setup.err
                 eo D "Done."
         else
                 # Future additions here
@@ -921,18 +887,22 @@ function install_scripts {
 
 function install_freegeoip {
 
-	echo D "Installing freegeoip v3.2, license and geo.json translation file."
+	eo D "Installing freegeoip v3.2, license and geo.json translation file."
 	if [[ "$os" == "1" ]]
 	then
+		ARCHIVE='freegeoip-3.2-linux-amd64'
 		eo D "Downloading from fiorix/freegeoip on github."
-		wget https://github.com/fiorix/freegeoip/releases/download/v3.2/freegeoip-3.2-linux-amd64.tar.gz
+		wget https://github.com/fiorix/freegeoip/releases/download/v3.2/"$ARCHIVE".tar.gz >> setup.log 2>> setup.err
 		eo D "Extracting archive."
-		tar -zxf freegeoip-3.2-linux-amd64.tar.gz freegeoip-3.2-linux-amd64/freegeoip
+		tar -zxf "$ARCHIVE".tar.gz "$ARCHIVE"/freegeoip
 		eo D "Installing files."
-		cp -f freegeoip-3.2-linux-amd64/freegeoip "$BINFOLDER"
+		cp -f "$ARCHIVE"/freegeoip "$BINFOLDER"
 		cp -f geo.json "$BINFOLDER"
 		cp -f freegeoip.license "$BINFOLDER"
-		echo D "done."
+		eo D "Removing archive."
+		rm -rf "$ARCHIVE"
+		rm -f "$ARCHIVE".tar.gz
+		eo D "done."
 		return 1
 	fi
 }
@@ -1017,7 +987,7 @@ function install_service {
                 eo D "Skipping entry. Use crontab -u $GRCUSER -e to edit users crontab"
 	else
 		eo N "Does crontab entry exist for freegeoip?"
-		crontabnew="@reboot /usr/local/bin/freegeoip -http 127.0.0.1:$FREEGEOIPPORT -silent &"
+		crontabnew="@reboot /usr/local/bin/freegeoip -http 127.0.0.1:$FREEGEOIPPORT -silent  >/dev/null 2>&1 &"
 		crontaboutput="$crontabinput$newline$crontabnew"
 		echo "$crontaboutput" | crontab -u $GRCUSER -
 	fi
@@ -1030,10 +1000,10 @@ function install_service {
 function startup {
 
 	eo D "Enabling services."
-        systemctl enable gridcoinmain.timer
-        systemctl enable gridcoinmarket.timer
-        systemctl enable gridcoingeo.timer
-	systemctl daemon-reload 
+        systemctl enable gridcoinmain.timer >> setup.log 2>> setup.err
+        systemctl enable gridcoinmarket.timer >> setup.log 2>> setup.err
+        systemctl enable gridcoingeo.timer >> setup.log 2>> setup.err
+	systemctl daemon-reload  >> setup.log 2>> setup.err
 	eo D "Done."
 	eo I "We need to startup freegeoip and services related to GRC-Netdata."
 	ei 1 startup "May I start up these? (Y/N):"
@@ -1044,7 +1014,7 @@ function startup {
 	if [[ "$startupcase" == "Y" ]]
 	then
 		eo D "freegeoip will run with sudo -u $GRCUSER this time however will run under $GRCUSER crontab after reboot automatically."
-		sudo -u $GRCUSER /usr/local/bin/freegeoip -http 127.0.0.1:$FREEGEOIPPORT -silent &
+		sudo -u $GRCUSER /usr/local/bin/freegeoip -http 127.0.0.1:$FREEGEOIPPORT -silent >/dev/null 2>&1 &
 		systemctl start gridcoinmain.timer
 		systemctl start gridcoinmarket.timer
 		systemctl start gridcoingeo.timer
@@ -1063,8 +1033,8 @@ function startup {
 	if [[ "$restartcase" == "Y" ]]
 	then
 		eo D "Restart netdata service."
-		systemctl stop netdata.service
-		systemctl start netdata.service
+		systemctl stop netdata.service >> setup.log 2>> setup.err
+		systemctl start netdata.service >> setup.log 2>> setup.err
 	elif [[ "$restartcase" == "N" ]]
 	then
 		eo D "Read readme.md about restarting netdata."
