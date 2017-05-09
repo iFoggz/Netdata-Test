@@ -17,17 +17,29 @@
 
 GRCCONF='/usr/local/bin/grc-netdata.conf'
 GRCGEO='/usr/local/bin/geo.json'
-FREEGEOIPPORT=$(jq -r '.[].FREEGEOIPORT' $GRCCONF)
+# Read an config ini file for GRC info:)
+while read -r GRCCONFDATA; do
+        if [[ ${GRCCONFDATA%%=*} == "GRCPATH" ]]
+        then
+                GRCPATH=${GRCCONFDATA#*=}
+        elif [[ ${GRCCONFDATA%%=*} == "GRCAPP" ]]
+        then
+                GRCAPP=${GRCCONFDATA#*=}
+        elif [[ ${GRCCONFDATA%%=*} == "FREEGEOIPPORT" ]]
+        then
+                FREEGEOIPPORT=${GRCCONFDATA#*=}
+        else
+                continue
+        fi
+done < $GRCCONF
 APIADDRESS="http://127.0.0.1:$FREEGEOIPPORT/json"
-GRCAPP=$(jq -r '.[].GRCAPP' $GRCCONF)
-GRCPATH=$(jq -r '.[].GRCPATH' $GRCCONF)
 
 # END enviroment variables
 
 if pgrep "gridcoin" > /dev/null
 then
 
-	peerinfo=$($GRCAPP getpeerinfo | jq -r '.[].addr' | rev | cut -d':' -f2- | rev)
+	peerinfo=$($GRCAPP getpeerinfo | jq -r '.[].addr' | rev | cut -d':' -f2- | rev | tr -d '[' | tr -d ']')
 	contNA=0	# North America
 	contSA=0	# South America
 	contEU=0	# Europe

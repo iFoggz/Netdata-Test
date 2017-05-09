@@ -13,9 +13,9 @@ load_priority=3 #3rd priority -> After blockchain details & peer details
 # it is disabled by default.
 # there is no point to enable it, since netdata already
 # collects this information using its internal plugins.
-markets_enabled=1
+gridcoinmarket_enabled=1
 
-markets_check() {
+gridcoinmarket_check() {
 	# this should return:
 	#  - 0 to enable the chart
 	#  - 1 to disable the chart
@@ -55,7 +55,14 @@ EOF
 
 gridcoinmarket_update() {
         GRCCONF='/usr/local/bin/grc-netdata.conf'
-        GRCPATH=$(jq -r '.[].GRCPATH' $GRCCONF)
+        # Read an config ini file for GRCPATH:)
+        while read -r GRCCONFDATA; do
+                if [[ ${GRCCONFDATA%%=*} == "GRCPATH" ]]
+                then
+                        GRCPATH=${GRCCONFDATA#*=}
+                        break
+                fi
+        done < $GRCCONF
         GRCCMC="$GRCPATH/gridcoin_cmc.json"
 	rankVal=$(jq -r '.[].rank' $GRCCMC | tr -d '\n')
         usdVal0=$(jq -r '.[].price_usd' $GRCCMC | tr -d '\n')

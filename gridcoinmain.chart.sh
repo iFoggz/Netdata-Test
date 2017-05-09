@@ -60,7 +60,14 @@ EOF
 
 gridcoinmain_update() {
         GRCCONF='/usr/local/bin/grc-netdata.conf'
-        GRCPATH=$(jq -r '.[].GRCPATH' $GRCCONF)
+        # Read an config ini file for GRCPATH:)
+        while read -r GRCCONFDATA; do
+                if [[ ${GRCCONFDATA%%=*} == "GRCPATH" ]]
+                then
+                        GRCPATH=${GRCCONFDATA#*=}
+                        break
+                fi
+        done < $GRCCONF
         GRCINFO="$GRCPATH/getinfo.json"
         GRCSTAKING="$GRCPATH/getstakinginfo.json"
         GRCGEO="$GRCPATH/geooutput.json"
