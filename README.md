@@ -9,8 +9,9 @@ Fedora
 Arch
 openSUSE
 
-chmod +x setup.sh
-./setup.sh
+Get started.
+* chmod +x setup.sh
+* ./setup.sh
 
 # Prereqs
 * [Netdata](https://github.com/firehol/netdata/wiki/Installation)
