@@ -1,13 +1,13 @@
 # GRC-Netdata
-Netdata charts for gridcoin
+* Netdata charts for gridcoin
 
 # Tested on
-Ubuntu/Debian install Install Passes
+* Ubuntu/Debian install Install Passes
 
 # Needs testing on.
-Fedora
-Arch
-openSUSE
+* Fedora
+* Arch
+* openSUSE
 
 # Get started.
 * chmod +x setup.sh
