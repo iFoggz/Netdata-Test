@@ -9,7 +9,7 @@ Fedora
 Arch
 openSUSE
 
-Get started.
+# Get started.
 * chmod +x setup.sh
 * ./setup.sh
 
