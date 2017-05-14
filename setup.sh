@@ -5,12 +5,14 @@
 # Supports:
 #	Ubuntu/Debian
 #
-# Future Supports:
+# Needs testing:
 #	Fedora
 #	openSUSE
-#	REHL
 #	ARCH
-#	Anything else netdata and gridcoin support
+#
+# Future Supports:
+#	REHL
+#	Anything else netdata and gridcoin support. If you know a release please do tell me as well as any information about dependecy packages,etc.
 #
 # Set colors
 TY="\033[1;32m[Y]\033[m"
