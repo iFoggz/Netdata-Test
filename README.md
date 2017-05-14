@@ -2,7 +2,7 @@
 * Netdata charts for gridcoin
 
 # Tested on
-* Ubuntu/Debian install Install Passes
+* Ubuntu/Debian install Install Passes XD. Debian should be the same but feel free to test.
 
 # Needs testing on.
 * Fedora
