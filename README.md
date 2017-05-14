@@ -19,3 +19,4 @@ Get started.
 
 # Notes
 * All required dependencies the scripts will use will be autoinstalled
+* Exception is crontab and systemd as I'm not ready to touch that one yet. Too vague of information across platform.
