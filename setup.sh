@@ -194,10 +194,12 @@ function gather_info {
 	conf_exists
 	if [[ "$keepconfigcase" == "Y" ]]
 	then
+		conf_gather2
 		return 1
 	fi
         conf_reset
         conf_gather
+	conf_gather2
         conf_commit
 	return 1
 }
@@ -548,21 +550,28 @@ function conf_gather {
 	conf_set_grcpath
 	conf_set_grcapp
 	conf_set_freegeoipport
-	eo D "Lets set systemd timer/dealys"
-        eo W "Service timers must be set as #s. Example 5s"
-	eo W "Service delays must be set as #min. Example 7min"
-	eo W "This install only supports seconds and minutes as it is pointless to be higher then that."
-	eo W "Delays are default 7min to allow time for gridcoin daemon to fully start as it takes time."
-	conf_set_getinfotimer
-	conf_set_getinfodelay
-	conf_set_getgeotimer
-	conf_set_getgeodelay
-	conf_set_getmarkettimer
-	conf_set_getmarketdelay
 	return 1
 
 }
 
+# Gather config part 2 must always gather!
+
+function conf_gather2 {
+
+        eo D "Lets set systemd timer/dealys"
+        eo W "Service timers must be set as #s. Example 5s"
+        eo W "Service delays must be set as #min. Example 7min"
+        eo W "This install only supports seconds and minutes as it is pointless to be higher then that."
+        eo W "Delays are default 7min to allow time for gridcoin daemon to fully start as it takes time."
+        conf_set_getinfotimer
+        conf_set_getinfodelay
+        conf_set_getgeotimer
+        conf_set_getgeodelay
+        conf_set_getmarkettimer
+        conf_set_getmarketdelay
+	return 1
+
+}
 # conf_commit just as it sounds.
 
 function conf_commit {
@@ -1003,7 +1012,7 @@ function install_service {
 		eo N "Does crontab entry exist for freegeoip?"
 		crontabnew="@reboot /usr/local/bin/freegeoip -http 127.0.0.1:$FREEGEOIPPORT -silent  >/dev/null 2>&1 &"
 		crontaboutput="$crontabinput$newline$crontabnew"
-		echo "$crontaboutput" | crontab -u $GRCUSER -
+		echo "$crontaboutput" | crontab -u "$GRCUSER" -
 	fi
 	eo D "Done."
 	return 1
