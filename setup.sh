@@ -162,17 +162,17 @@ function check_release {
 		eo I "Installing for Ubuntu/Debian."
 		os="1"
 		return 1
-	elif [[ "$osrelease" == "2" ]]
+	elif [[ "$os_release" == "2" ]]
 	then
 		eo I "Installing for Fedora."
 		os="2"
 		return 1
-        elif [[ "$osrelease" == "3" ]]
+        elif [[ "$os_release" == "3" ]]
         then
                 eo I "Installing for SUSE LINUX."
                 os="3"
                 return 1
-        elif [[ "$osrelease" == "4" ]]
+        elif [[ "$os_release" == "4" ]]
         then
                 eo I "Installing for ARCH."
                 os="4"
