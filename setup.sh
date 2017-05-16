@@ -1142,7 +1142,11 @@ install_service
 startup
 if [[ "$os" == "2" ]]
 then
+	eo W "Shutting down gridcoin daemon. This only need to happen for Fedora dur to permissions."
+	sudo -u "$GRCUSER" "$GRCAPP" stop
 	fedora_extra
+	eo D "Starting gridcoin daemon."
+	sudo -u "$GRCUSER" "$GRCAPP" -datadir="$GRCPATH"
 fi
 eo D "Setup is complete."
 exit 1
