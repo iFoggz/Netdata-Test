@@ -159,6 +159,7 @@ function check_release {
 				eo I "Release is Fedora"
 				eo I "Installing for Fedora."
 				os="2"
+				return 1
 			fi
 			break
 		fi
