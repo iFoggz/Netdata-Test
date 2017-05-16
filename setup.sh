@@ -600,7 +600,7 @@ function check_dep {
                 if [[ -a /bin/dnf ]]
                 then
                         eo D "Updating dnf."
-                        dnf update >> setup.log 2>> setup.err
+                        dnf -y update >> setup.log 2>> setup.err
                 else
                         eo E "dnf not installed. Exiting."
                         exit 1
@@ -652,14 +652,23 @@ function check_dep {
                 eo E "Must have netdata installed. Exiting."
                 exit 1
         fi
-        if [[ -a /bin/systemd ]]
-        then
+	if [[ "$os" == "2" && -a /usr/bin/systemctl ]]
+	then
                 eo Y "Is 'systemd' installed?"
 	else
 		eo N "Is 'systemd' installed?"
 		eo E "systemd is required for this install. Exiting."
 		exit 1
 	fi
+	# Fedora stored in different location... See above..
+	if [[ "$os" != "2" && -a /bin/systemctl ]]
+        then
+                eo Y "Is 'systemd' installed?"
+        else
+                eo N "Is 'systemd' installed?"
+                eo E "systemd is required for this install. Exiting."
+                exit 1
+        fi
 	if [[ -a /usr/bin/curl ]]
 	then
 		eo Y "Is 'curl' installed?"
