@@ -652,23 +652,26 @@ function check_dep {
                 eo E "Must have netdata installed. Exiting."
                 exit 1
         fi
-	if [[ "$os" == "2" && -a /usr/bin/systemctl ]]
+	if [[ "$os" == "2" ]]
 	then
-                eo Y "Is 'systemd' installed?"
+		if [[ -a /usr/bin/systemctl ]]
+		then
+	                eo Y "Is 'systemd' installed?"
+		else
+			eo N "Is 'systemd' installed?"
+			eo E "systemd is required for this install. Exiting."
+			exit 1
+		fi
 	else
-		eo N "Is 'systemd' installed?"
-		eo E "systemd is required for this install. Exiting."
-		exit 1
+		if [[ -a /bin/systemctl ]]
+	        then
+	                eo Y "Is 'systemd' installed?"
+	        else
+	                eo N "Is 'systemd' installed?"
+	                eo E "systemd is required for this install. Exiting."
+	                exit 1
+	        fi
 	fi
-	# Fedora stored in different location... See above..
-	if [[ "$os" != "2" && -a /bin/systemctl ]]
-        then
-                eo Y "Is 'systemd' installed?"
-        else
-                eo N "Is 'systemd' installed?"
-                eo E "systemd is required for this install. Exiting."
-                exit 1
-        fi
 	if [[ -a /usr/bin/curl ]]
 	then
 		eo Y "Is 'curl' installed?"
