@@ -147,9 +147,24 @@ function check_release {
 			eo E "Exiting."
 			exit 1
 		fi
-
+        elif [[ -a /etc/os-release ]]
+	# Only for Fedora so far.
+        then
+                eo Y "Was os-release found?"
+		while read -r os__release;do
+		if [[ ${os__release%%=*} == "NAME" ]]
+		then
+			if [[ ${os__release#*=} == "Fedora" ]]
+			then
+				eo I "Release is Fedora"
+				eo I "Installing for Fedora."
+				os="2"
+			fi
+			break
+		fi
+		done < /etc/os-release
 	else
-		eo N "Was lsb_release found?"
+		eo N "Was os-release found?"
 	fi
 	eo D "List of supported releases:"
 	eo O "1) Ubuntu/Debian"
@@ -199,8 +214,8 @@ function gather_info {
 	fi
         conf_reset
         conf_gather
+	conf_commit
 	conf_gather2
-        conf_commit
 	return 1
 }
 
@@ -563,6 +578,23 @@ function conf_gather2 {
         eo W "Service delays must be set as #min. Example 7min"
         eo W "This install only supports seconds and minutes as it is pointless to be higher then that."
         eo W "Delays are default 7min to allow time for gridcoin daemon to fully start as it takes time."
+       while read -r GRCCONFDATA; do
+        if [[ ${GRCCONFDATA%%=*} == "GRCUSER" ]]
+        then
+            	GRCUSER=${GRCCONFDATA#*=}
+        elif [[ ${GRCCONFDATA%%=*} == "GRCPATH" ]]
+        then
+            	GRCPATH=${GRCCONFDATA#*=}
+        elif [[ ${GRCCONFDATA%%=*} == "GRCAPP" ]]
+        then
+            	GRCAPP=${GRCCONFDATA#*=}
+        elif [[ ${GRCCONFDATA%%=*} == "FREEGEOIPPORT" ]]
+        then
+            	FREEGEOIPPORT=${GRCCONFDATA#*=}
+        else
+            	continue
+        fi
+	done < $GRCCONF
         conf_set_getinfotimer
         conf_set_getinfodelay
         conf_set_getgeotimer
@@ -671,15 +703,17 @@ function check_dep {
 			eo E "systemd is required for this install. Exiting."
 			exit 1
 		fi
-	else
+	fi
+	if [[ "$os" != "2" ]]
+	then
 		if [[ -a /bin/systemctl ]]
-	        then
-	                eo Y "Is 'systemd' installed?"
-	        else
-	                eo N "Is 'systemd' installed?"
-	                eo E "systemd is required for this install. Exiting."
-	                exit 1
-	        fi
+		then
+		        eo Y "Is 'systemd' installed?"
+		else
+		        eo N "Is 'systemd' installed?"
+		        eo E "systemd is required for this install. Exiting."
+		        exit 1
+		fi
 	fi
 	if [[ -a /usr/bin/curl ]]
 	then
@@ -911,23 +945,21 @@ function install_scripts {
 function install_freegeoip {
 
 	eo D "Installing freegeoip v3.2, license and geo.json translation file."
-	if [[ "$os" == "1" ]]
-	then
-		ARCHIVE='freegeoip-3.2-linux-amd64'
-		eo D "Downloading from fiorix/freegeoip on github."
-		wget https://github.com/fiorix/freegeoip/releases/download/v3.2/"$ARCHIVE".tar.gz >> setup.log 2>> setup.err
-		eo D "Extracting archive."
-		tar -zxf "$ARCHIVE".tar.gz "$ARCHIVE"/freegeoip
-		eo D "Installing files."
-		cp -f "$ARCHIVE"/freegeoip "$BINFOLDER"
-		cp -f geo.json "$BINFOLDER"
-		cp -f freegeoip.license "$BINFOLDER"
-		eo D "Removing archive."
-		rm -rf "$ARCHIVE"
-		rm -f "$ARCHIVE".tar.gz
-		eo D "done."
-		return 1
-	fi
+	ARCHIVE='freegeoip-3.2-linux-amd64'
+	eo D "Downloading from fiorix/freegeoip on github."
+	wget https://github.com/fiorix/freegeoip/releases/download/v3.2/"$ARCHIVE".tar.gz >> setup.log 2>> setup.err
+	eo D "Extracting archive."
+	tar -zxf "$ARCHIVE".tar.gz "$ARCHIVE"/freegeoip
+	eo D "Installing files."
+	cp -f "$ARCHIVE"/freegeoip "$BINFOLDER"
+	cp -f geo.json "$BINFOLDER"
+	cp -f freegeoip.license "$BINFOLDER"
+	eo D "Removing archive."
+	rm -rf "$ARCHIVE"
+	rm -f "$ARCHIVE".tar.gz
+	eo D "done."
+	return 1
+
 }
 
 # install service files
@@ -1068,7 +1100,21 @@ function startup {
 	return 1
 }
 
+# Fedora requires netdata user to be in group of the gridcoin user as well as modifying the permissions on home directory for gridcoin to 775 to allow group access.
+# If there is a better way you know of please let me know!
 
+function fedora_extra {
+
+	# Netdata default groups are netdata and adm so we append grcuser
+	usermod -a -G netdata,"$GRCUSER",adm netdata
+	# Modify grcuser directory to accept group access to read/execute -- note. execute doesnt allow modifying of files!
+	# Modify home directory
+	chmod 750 /home/"$GRCUSER"
+	# Modify gridcoin directory -- Keeps other paths inside gridcoin safer.
+	chmod 750 "$GRCPATH"
+	return 1
+
+}
 # Start here
 
 echo
@@ -1086,5 +1132,9 @@ install_scripts
 install_freegeoip
 install_service
 startup
+if [[ "$os" == "2" ]]
+then
+	fedora_extra
+fi
 eo D "Setup is complete."
 exit 1
