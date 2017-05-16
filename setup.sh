@@ -1139,7 +1139,6 @@ install_charts
 install_scripts
 install_freegeoip
 install_service
-startup
 if [[ "$os" == "2" ]]
 then
 	eo W "Shutting down gridcoin daemon. This only need to happen for Fedora dur to permissions."
@@ -1147,6 +1146,8 @@ then
 	fedora_extra
 	eo D "Starting gridcoin daemon."
 	sudo -u "$GRCUSER" "$GRCAPP" -datadir="$GRCPATH"
+	eo D "It will take a few minutes before the gridcoin stats will show in the chart while gridcoin loads."
 fi
+startup
 eo D "Setup is complete."
 exit 1
