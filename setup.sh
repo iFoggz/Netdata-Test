@@ -1112,13 +1112,7 @@ function fedora_extra {
 	# Modify home directory
 	chmod 750 /home/"$GRCUSER"
 	# Modify gridcoin directory -- Keeps other paths inside gridcoin safer.
-	chmod -R 750 "$GRCPATH"
-	# Protect gridcoinresearch.conf - Owner only
-	chmod 700 "$GRCPATH"/gridcoinresearch.conf
-	# Protect wallet.dat
-	chmod 700 "$GRCPATH"/wallet.dat
-	# Protect Backps 
-	chmod -R 700 "$GRCPATH"/walletbackups
+	chmod 750 "$GRCPATH"
 	return 1
 
 }
