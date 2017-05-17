@@ -3,9 +3,9 @@
 
 # Tested on
 * Ubuntu/Debian install Install Passes XD. Debian should be the same but feel free to test.
+* Fedora passed but only tested on one version of Fedora.
 
 # Needs testing on.
-* Fedora
 * Arch
 * openSUSE
 
